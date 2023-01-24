@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    command: bash -c "sh ./bin/wait-for/wait-for.sh kafka:29092 --timeout=20 &&
+      uvicorn app.api:app
+      --host 0.0.0.0 --port 8080
+      --reload --log-level debug
+      "
+    volumes:
+      - ./app:/home/code/app
+    environment:
+      FAUST_BROKER_URL: "kafka://kafka:29092"
+    depends_on:
+      - kafka
+
+  worker:
+    build: .
+    command: bash -c "sh ./bin/wait-for/wait-for.sh kafka:29092 --timeout=20 && python -m app.worker worker -l info"
+    volumes:
+      - ./app:/home/code/app
+    environment:
+      FAUST_BROKER_URL: "kafka://kafka:29092"
+    depends_on:
+      - kafka
+      - api
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.1
+    ports:
+      - "29092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+      - kafka-secrets:/etc/kafka/secrets
+    depends_on:
+      - zookeeper
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.1
+    ports:
+      - "32181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 32181
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-log:/var/lib/zookeeper/log
+      - zookeeper-secrets:/etc/zookeeper/secrets
+
+volumes:
+  kafka-data: {}
+  kafka-secrets: {}
+  zookeeper-data: {}
+  zookeeper-log: {}
+  zookeeper-secrets: {}
