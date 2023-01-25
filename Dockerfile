@@ -36,7 +36,7 @@ RUN chmod u+x ./bin/wait-for/wait-for.sh
 
 
 # create a non-root user and switch to it, for security.
-RUN addgroup --system --gid 1001 "app-user"
-RUN adduser --system --uid 1001 "app-user"
-USER "app-user"
+RUN addgroup --system --gid 1001 "faust-himself"
+RUN adduser --system --uid 1001 "faust-himself"
+USER "faust-himself"
 
