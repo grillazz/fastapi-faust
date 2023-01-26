@@ -1,5 +1,7 @@
 import asyncio
 import importlib
+from typing import Optional
+
 import faust
 from fastapi import FastAPI
 import app.worker as worker
@@ -11,7 +13,7 @@ logger = get_logger(__name__)
 app = FastAPI()
 
 
-class Greeting(faust.Record):
+class Saluto(faust.Record):
     from_name: str
     to_name: str
 
@@ -24,7 +26,7 @@ async def startup():
 
     app.state.faust = worker.get_faust_app()
     #
-    # app.state.faust.topic('hello-topic', value_type=Greeting)
+    app.state.faust.topic('saluti-argomento', value_type=Saluto)
     # start the faust app in client mode
     asyncio.create_task(app.state.faust.start_client())
 
@@ -37,13 +39,16 @@ async def shutdown():
     await app.state.faust.stop()
 
 
-@app.post("/increment")
-async def get_increment():
+@app.post("/greeting")
+async def get_increment(
+        from_name: Optional[str] = None,
+        to_name: Optional[str] = None
+):
     greeting_task = importlib.import_module(
         "app.worker.tasks.greeting",
     )
-    await greeting_task.hello.send(
-        value=Greeting(from_name='Faust', to_name='you'),
+    await greeting_task.topic.send(
+        value=Saluto(from_name, to_name),
     )
 
     return {"message": "Message sent. Ho Ho Ho!"}
