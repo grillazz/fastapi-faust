@@ -55,8 +55,8 @@ services:
       - zookeeper-secrets:/etc/zookeeper/secrets
 
 volumes:
-  kafka-data: {}
-  kafka-secrets: {}
-  zookeeper-data: {}
-  zookeeper-log: {}
-  zookeeper-secrets: {}
+  kafka-data: { }
+  kafka-secrets: { }
+  zookeeper-data: { }
+  zookeeper-log: { }
+  zookeeper-secrets: { }

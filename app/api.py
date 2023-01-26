@@ -6,14 +6,15 @@ import app.worker as worker
 
 from app.utils import get_logger
 
-
 logger = get_logger(__name__)
 
 app = FastAPI()
 
+
 class Greeting(faust.Record):
     from_name: str
     to_name: str
+
 
 @app.on_event("startup")
 async def startup():

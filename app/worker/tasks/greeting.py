@@ -8,7 +8,6 @@ class Saluto(faust.Record):
     from_name: str = 'Faust'
 
 
-
 faust_app = get_faust_app()
 topic = faust_app.topic('saluti-argomento', value_type=Saluto)
 
@@ -17,4 +16,3 @@ topic = faust_app.topic('saluti-argomento', value_type=Saluto)
 async def hello(greetings):
     async for greeting in greetings:
         print(f'Saluti veloci da {greeting.from_name} a {greeting.to_name}')
-
