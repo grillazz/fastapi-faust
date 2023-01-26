@@ -1,38 +1,39 @@
 # fastapi-faust
 
-FastAPI + Faust = :heart:
-ASGI fastapi integration with Python Stream Processing. A Faust fork with FastAPI integration.
+Example integration of [FastAPI](https://fastapi.tiangolo.com/) integration with [Faust - Python Stream Processing Fork](https://github.com/faust-streaming/faust)
 
-## Basic Architecture
-moved to confluence
+This is a very opinionated example repository for a python backend API.
+It is not a template as it contains a few things already as an example for how to build something from here.
 
-## Running the app locally
-This is a very opinionated example repository for a python backend API. It is not a template as it contains a few things already as an example for how to build something from here.
-This project was originally created by grillazz, this is a hard fork as I intend to deviate from the upstream - adding more opinion and changing a few things.
+This project [fastapi-faust-example](https://github.com/toh995/fastapi-faust-example) was originally created by [toh995](https://github.com/toh995/), this is a hard fork as I intend to deviate from the upstream - 
+adding more opinion and changing a few things i.e. switch from  [Faust](https://github.com/robinhood/faust) to [Faust - Python Stream Processing Fork](https://github.com/faust-streaming/faust)
 
-dwa F F jedno czarne na zlieny drugie zielone na czarnym - piorun i piorko
 
-# Build the container
+### How to Setup
+To build , run and test and more ... use magic of make help to play with this project.
 ```shell
-    docker-compose build
+make help
 ```
-# Run the container
-```shell
-    docker-compose up
-```
-docker-compose up
 
-# Test with cURL
+
+### Test with cURL
 ```shell
-curl -X 'POST' 'http://0.0.0.0:8080/increment' -H 'accept: application/json' -d ''
+curl -X 'POST' \
+  'http://0.0.0.0:8080/greeting?from_name=Faust&to_name=World' \
+  -H 'accept: application/json' \
+  -d ''
 ```
 and you get response
 ```shell
-fastapi-faust-poc-api-1        | INFO:     172.18.0.1:57428 - "POST /increment HTTP/1.1" 200 OK
-fastapi-faust-poc-worker-1     | [2022-12-23 12:05:13,105] [1] [WARNING] Hello from Faust to you 
-fastapi-faust-poc-api-1        | INFO:     172.18.0.1:64008 - "POST /increment HTTP/1.1" 200 OK
-fastapi-faust-poc-worker-1     | [2022-12-23 12:07:00,407] [1] [WARNING] Hello from Faust to you 
-fastapi-faust-poc-api-1        | INFO:     172.18.0.1:58350 - "POST /increment HTTP/1.1" 200 OK
-fastapi-faust-poc-worker-1     | [2022-12-23 12:07:07,233] [1] [WARNING] Hello from Faust to you 
+fastapi-faust-api-1        | INFO:     172.24.0.1:65078 - "POST /greeting?from_name=Faust&to_name=World HTTP/1.1" 200 OK
+fastapi-faust-worker-1     | [2023-01-26 19:39:59,701] [1] [WARNING] Saluti veloci da Faust a World 
+fastapi-faust-api-1        | INFO:     172.24.0.1:62310 - "POST /greeting?from_name=Faust&to_name=World HTTP/1.1" 200 OK
+fastapi-faust-worker-1     | [2023-01-26 19:40:34,334] [1] [WARNING] Saluti veloci da Faust a World 
+fastapi-faust-api-1        | INFO:     172.24.0.1:64476 - "POST /greeting?from_name=Faust&to_name=World HTTP/1.1" 200 OK
+fastapi-faust-worker-1     | [2023-01-26 19:40:37,264] [1] [WARNING] Saluti veloci da Faust a World 
+fastapi-faust-api-1        | INFO:     172.24.0.1:64478 - "POST /greeting?from_name=Faust&to_name=World HTTP/1.1" 200 OK
+fastapi-faust-worker-1     | [2023-01-26 19:40:38,026] [1] [WARNING] Saluti veloci da Faust a World 
 
 ```
+
+FastAPI + Faust = :heart:
