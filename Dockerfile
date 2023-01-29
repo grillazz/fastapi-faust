@@ -32,6 +32,7 @@ FROM install as app-image
 COPY app app
 COPY worker-data worker-data
 COPY bin bin
+COPY logging.ini logging.ini
 RUN chmod u+x ./bin/wait-for/wait-for.sh
 
 

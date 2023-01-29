@@ -9,7 +9,8 @@ services:
     command: bash -c "sh ./bin/wait-for/wait-for.sh kafka:29092 --timeout=20 &&
       uvicorn app.api:app
       --host 0.0.0.0 --port 8080
-      --reload --log-level debug
+      --reload 
+       --log-config ./logging.ini
       "
     volumes:
       - ./app:/home/code/app
@@ -49,6 +50,7 @@ services:
       - "32181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_LOG4J_ROOT_LOGLEVEL: WARN
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-log:/var/lib/zookeeper/log
