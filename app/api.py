@@ -4,8 +4,8 @@ from typing import Optional
 
 import faust
 from fastapi import FastAPI
-import app.worker as worker
 
+import app.worker as worker
 from app.utils import get_logger
 
 logger = get_logger(__name__)
@@ -26,7 +26,7 @@ async def startup():
 
     app.state.faust = worker.get_faust_app()
     #
-    app.state.faust.topic('saluti-argomento', value_type=Saluto)
+    app.state.faust.topic("saluti-argomento", value_type=Saluto)
     # start the faust app in client mode
     asyncio.create_task(app.state.faust.start_client())
 
@@ -40,10 +40,7 @@ async def shutdown():
 
 
 @app.post("/greeting")
-async def get_increment(
-        from_name: Optional[str] = None,
-        to_name: Optional[str] = None
-):
+async def get_increment(from_name: str | None = None, to_name: str | None = None):
     greeting_task = importlib.import_module(
         "app.worker.tasks.greeting",
     )
