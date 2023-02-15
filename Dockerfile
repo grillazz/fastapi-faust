@@ -1,4 +1,4 @@
-FROM python:3.10-slim AS base
+FROM python:3.11-slim AS base
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends curl git build-essential netcat \
@@ -40,4 +40,3 @@ RUN chmod u+x ./bin/wait-for/wait-for.sh
 RUN addgroup --system --gid 1001 "faust-himself"
 RUN adduser --system --uid 1001 "faust-himself"
 USER "faust-himself"
-
