@@ -4,13 +4,13 @@ help: ## Show this help
 
 .PHONY: build
 build:	## Build project with compose
-	docker-compose build
+	docker compose build
 
 .PHONY: up
 up:	## Run project with compose
-	docker-compose up --remove-orphans
+	docker compose up --remove-orphans
 
 .PHONY: clean
 clean: ## Clean Reset project containers and volumes with compose
-	docker-compose down -v --remove-orphans | true
-	docker-compose rm -f | true
+	docker compose down -v --remove-orphans | true
+	docker compose rm -f | true

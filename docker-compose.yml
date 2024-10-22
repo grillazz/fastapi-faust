@@ -1,37 +1,40 @@
-version: "3.8"
-
 services:
-
   api:
     build: .
     ports:
       - "8080:8080"
-    command: bash -c "sh ./bin/wait-for/wait-for.sh kafka:29092 --timeout=20 &&
-      uvicorn app.api:app
+    command: bash -c "uvicorn app.api:app
+      --log-config ./logging.ini
       --host 0.0.0.0 --port 8080
-      --reload 
-       --log-config ./logging.ini
+      --lifespan=on --use-colors --loop uvloop --http httptools
+      --reload --log-level debug
       "
     volumes:
       - ./app:/home/code/app
+      - ./worker-data:/worker-data
     environment:
       FAUST_BROKER_URL: "kafka://kafka:29092"
+      APP_DATADIR: "/worker-data"
+      APP_TABLEDIR: "/worker-data"
     depends_on:
       - kafka
 
   worker:
     build: .
-    command: bash -c "sh ./bin/wait-for/wait-for.sh kafka:29092 --timeout=20 && python -m app.worker worker -l info"
+    command: bash -c "python -m app.worker worker -l info "
     volumes:
       - ./app:/home/code/app
+      - ./worker-data:/worker-data
     environment:
       FAUST_BROKER_URL: "kafka://kafka:29092"
+      APP_DATADIR: "/worker-data"
+      APP_TABLEDIR: "/worker-data"
     depends_on:
       - kafka
       - api
 
   kafka:
-    image: confluentinc/cp-kafka:7.3.1
+    image: confluentinc/cp-kafka:latest
     ports:
       - "29092"
     environment:
@@ -45,7 +48,7 @@ services:
       - zookeeper
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.3.1
+    image: confluentinc/cp-zookeeper:latest
     ports:
       - "32181"
     environment:
