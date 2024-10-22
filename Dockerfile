@@ -1,7 +1,7 @@
-FROM python:3.11-slim AS base
+FROM python:3.12-slim-bookworm AS base
 RUN apt-get update \
     && apt-get upgrade -y \
-    && apt-get install -y --no-install-recommends curl git build-essential netcat \
+    && apt-get install -y --no-install-recommends curl git build-essential \
     && apt-get autoremove -y
 ENV POETRY_HOME="/opt/poetry"
 RUN curl -sSL https://install.python-poetry.org | python3 -
@@ -10,7 +10,7 @@ FROM base AS install
 WORKDIR /home/code
 
 # allow controlling the poetry installation of dependencies via external args
-ARG INSTALL_ARGS="--no-root --no-dev"
+ARG INSTALL_ARGS="--no-root"
 ENV POETRY_HOME="/opt/poetry"
 ENV PATH="$POETRY_HOME/bin:$PATH"
 COPY pyproject.toml poetry.lock ./
@@ -27,13 +27,13 @@ RUN apt-get purge -y curl git build-essential \
     && rm -rf /var/apt/lists/* \
     && rm -rf /var/cache/apt/*
 
-FROM install as app-image
+FROM install AS app-image
 
 COPY app app
 COPY worker-data worker-data
 COPY bin bin
 COPY logging.ini logging.ini
-RUN chmod u+x ./bin/wait-for/wait-for.sh
+RUN chmod u+x worker-data/v1/tables
 
 
 # create a non-root user and switch to it, for security.

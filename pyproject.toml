@@ -1,24 +1,39 @@
 [tool.poetry]
 name = "fastapi-faust-streaming"
-version = "0.0.2"
-description = ""
+version = "0.0.3"
+description = "Example of FastAPI integration with Faust - Python Stream Processing Fork"
 authors = ["Jakub Miazek <the@grillazz.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
-fastapi = "*"
-uvicorn = { extras = ["standard"], version = "*" }
-faust-streaming = { extras = ["uvloop"], version = "*" }
+python = "^3.12"
+fastapi = {version = "^0.115.2", extras = ["all"]}
+uvicorn = { version = "^0.32.0", extras = ["standard"]}
+uvloop = "^0.21.0"
+faust-streaming = { extras = ["uvloop"], version = "^0.11.3" }
 black = "*"
-httptools = "*"
-rich = "*"
+httptools = "^0.6.4"
+rich = "^13.9.2"
+ruff = "^0.7.0"
 
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
-[tool.black]
+[tool.ruff]
 line-length = 120
-include = '\.pyi?$'
+indent-width = 4
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
