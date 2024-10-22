@@ -30,11 +30,7 @@ RUN apt-get purge -y curl git build-essential \
 FROM install AS app-image
 
 COPY app app
-COPY worker-data worker-data
-COPY bin bin
 COPY logging.ini logging.ini
-RUN chmod u+x worker-data/v1/tables
-
 
 # create a non-root user and switch to it, for security.
 RUN addgroup --system --gid 1001 "faust-himself"

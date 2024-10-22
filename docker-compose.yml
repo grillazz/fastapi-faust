@@ -10,18 +10,24 @@ services:
       "
     volumes:
       - ./app:/home/code/app
+      - ./worker-data:/worker-data
     environment:
       FAUST_BROKER_URL: "kafka://kafka:29092"
+      APP_DATADIR: "/worker-data"
+      APP_TABLEDIR: "/worker-data"
     depends_on:
       - kafka
 
   worker:
     build: .
-    command: bash -c "python -m app.worker worker -l info"
+    command: bash -c "python -m app.worker worker -l info "
     volumes:
       - ./app:/home/code/app
+      - ./worker-data:/worker-data
     environment:
       FAUST_BROKER_URL: "kafka://kafka:29092"
+      APP_DATADIR: "/worker-data"
+      APP_TABLEDIR: "/worker-data"
     depends_on:
       - kafka
       - api
