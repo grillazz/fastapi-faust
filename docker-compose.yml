@@ -4,9 +4,10 @@ services:
     ports:
       - "8080:8080"
     command: bash -c "uvicorn app.api:app
+      --log-config ./logging.ini
       --host 0.0.0.0 --port 8080
-      --reload 
-       --log-config ./logging.ini
+      --lifespan=on --use-colors --loop uvloop --http httptools
+      --reload --log-level debug
       "
     volumes:
       - ./app:/home/code/app
