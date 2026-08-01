@@ -30,7 +30,8 @@ COPY --from=base --chown=faust:faust /faust /faust
 
 USER faust
 WORKDIR /faust
-COPY /app/ app/
+COPY app.py app/
+COPY worker.py app/
 COPY /tests/ tests/
 COPY .env app/
 COPY pyproject.toml /faust/pyproject.toml
