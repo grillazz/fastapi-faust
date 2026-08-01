@@ -1,24 +1,21 @@
-[tool.poetry]
+[project]
 name = "fastapi-faust-streaming"
-version = "0.0.3"
+version = "0.1.0"
 description = "Example of FastAPI integration with Faust - Python Stream Processing Fork"
-authors = ["Jakub Miazek <the@grillazz.com>"]
+authors = [
+    { name = "Jakub Miazek", email = "jakub.miazek.py@gmail.com" }
+]
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.12"
-fastapi = {version = "^0.115.2", extras = ["all"]}
-uvicorn = { version = "^0.32.0", extras = ["standard"]}
-uvloop = "^0.21.0"
-faust-streaming = { extras = ["uvloop"], version = "^0.11.3" }
-black = "*"
-httptools = "^0.6.4"
-rich = "^13.9.2"
-ruff = "^0.7.0"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi[all]>=0.115.2",
+    "faust-streaming[uvloop]>=0.11.3",
+    "httptools>=0.6.4",
+    "rich>=13.9.2",
+    "ruff>=0.7.0",
+    "uvicorn[standard]>=0.32.0",
+    "uvloop>=0.21.0",
+]
 
 [tool.ruff]
 line-length = 120
