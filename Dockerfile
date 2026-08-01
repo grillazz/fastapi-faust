@@ -1,38 +1,36 @@
-FROM python:3.12-slim-bookworm AS base
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y --no-install-recommends curl git build-essential \
-    && apt-get autoremove -y
-ENV POETRY_HOME="/opt/poetry"
-RUN curl -sSL https://install.python-poetry.org | python3 -
+FROM python:3.14.4-slim-trixie AS base
 
-FROM base AS install
-WORKDIR /home/code
+RUN apt-get update -qy \
+    && apt-get install -qyy \
+    -o APT::Install-Recommends=false \
+    -o APT::Install-Suggests=false \
+    build-essential \
+    ca-certificates
 
-# allow controlling the poetry installation of dependencies via external args
-ARG INSTALL_ARGS="--no-root"
-ENV POETRY_HOME="/opt/poetry"
-ENV PATH="$POETRY_HOME/bin:$PATH"
-COPY pyproject.toml poetry.lock ./
+COPY --from=ghcr.io/astral-sh/uv:0.11.12 /uv /uvx /bin/
 
-# install without virtualenv, since we are inside a container
-RUN poetry config virtualenvs.create false \
-    && poetry install $INSTALL_ARGS
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON=python3.14.4 \
+    UV_PROJECT_ENVIRONMENT=/faust
 
-# cleanup
-RUN curl -sSL https://install.python-poetry.org | python3 - --uninstall
-RUN apt-get purge -y curl git build-essential \
-    && apt-get clean -y \
-    && rm -rf /root/.cache \
-    && rm -rf /var/apt/lists/* \
-    && rm -rf /var/cache/apt/*
+COPY pyproject.toml /_lock/
+COPY uv.lock /_lock/
 
-FROM install AS app-image
+RUN cd /_lock && uv sync --locked --no-install-project
+##########################################################################
+FROM python:3.14.4-slim-trixie
 
-COPY app app
-COPY logging.ini logging.ini
+ENV PATH=/faust/bin:$PATH
 
-# create a non-root user and switch to it, for security.
-RUN addgroup --system --gid 1001 "faust-himself"
-RUN adduser --system --uid 1001 "faust-himself"
-USER "faust-himself"
+RUN groupadd -r faust
+RUN useradd -r -d /faust -g faust -N faust
+
+COPY --from=base --chown=faust:faust /faust /faust
+
+USER faust
+WORKDIR /faust
+COPY /app/ app/
+COPY /tests/ tests/
+COPY .env app/
+COPY pyproject.toml /faust/pyproject.toml
