@@ -3,34 +3,37 @@ services:
     build: .
     ports:
       - "8080:8080"
-    command: bash -c "uvicorn app:app
+    command: bash -c "uvicorn app.app:app
       --host 0.0.0.0 --port 8080
       --lifespan=on --use-colors --loop uvloop --http httptools
       --reload --log-level debug
       "
     volumes:
-      - ./app:/home/code/app
+      - ./app.py:/faust/app/app.py
       - ./worker-data:/worker-data
     environment:
       FAUST_BROKER_URL: "kafka://kafka:29092"
       APP_DATADIR: "/worker-data"
       APP_TABLEDIR: "/worker-data"
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
 
   worker:
     build: .
     command: bash -c "python -m app.worker worker -l info "
     volumes:
-      - ./app:/home/code/app
+      - ./worker.py:/faust/app/worker.py
       - ./worker-data:/worker-data
     environment:
       FAUST_BROKER_URL: "kafka://kafka:29092"
       APP_DATADIR: "/worker-data"
       APP_TABLEDIR: "/worker-data"
     depends_on:
-      - kafka
-      - api
+      api:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   kafka:
     image: confluentinc/cp-kafka:7.5.3
@@ -45,7 +48,14 @@ services:
       - kafka-data:/var/lib/kafka/data
       - kafka-secrets:/etc/kafka/secrets
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 29092 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.3
@@ -58,6 +68,11 @@ services:
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-log:/var/lib/zookeeper/log
       - zookeeper-secrets:/etc/zookeeper/secrets
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 32181 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   kafka-data: { }

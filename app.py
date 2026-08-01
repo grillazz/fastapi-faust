@@ -1,10 +1,10 @@
+import asyncio
 import os
+from contextlib import asynccontextmanager
 
+import faust
 from fastapi import FastAPI
 from pydantic import BaseModel
-import faust
-
-app = FastAPI()
 
 stream_app = faust.App(
     "demo-stream",
@@ -13,8 +13,23 @@ stream_app = faust.App(
 
 events = stream_app.topic("events", value_type=str)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(stream_app.start())
+    try:
+        yield
+    finally:
+        await stream_app.stop()
+        await task
+
+
+app = FastAPI(lifespan=lifespan)
+
+
 class Ingress(BaseModel):
     message: str
+
 
 @app.post("/publish")
 async def publish(payload: Ingress):
