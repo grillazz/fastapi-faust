@@ -12,7 +12,7 @@ services:
       - ./app.py:/faust/app/app.py
       - ./worker-data:/worker-data
     environment:
-      FAUST_BROKER_URL: "kafka://kafka:29092"
+      FAUST_BROKER_URL: "aiokafka://kafka:29092"
       APP_DATADIR: "/worker-data"
       APP_TABLEDIR: "/worker-data"
     depends_on:
@@ -26,7 +26,7 @@ services:
       - ./worker.py:/faust/app/worker.py
       - ./worker-data:/worker-data
     environment:
-      FAUST_BROKER_URL: "kafka://kafka:29092"
+      FAUST_BROKER_URL: "aiokafka://kafka:29092"
       APP_DATADIR: "/worker-data"
       APP_TABLEDIR: "/worker-data"
     depends_on:

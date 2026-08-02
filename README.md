@@ -84,6 +84,77 @@ Or view available targets:
 make help
 ```
 
+### Apache Kafka KRaft variant
+
+An alternative compose file (`compose-apache-kafka.yml`) runs the official Apache Kafka image in **KRaft mode** (without Zookeeper). Use the `-apache` Makefile targets:
+
+```shell
+make build-apache
+make up-apache
+make clean-apache
+```
+
+> **Troubleshooting:** If the Kafka container exits with an error like `Invalid cluster.id in /var/lib/kafka/data/meta.properties`, the persisted `kafka-data` volume contains a `cluster.id` from a previous run that no longer matches the current `CLUSTER_ID`. Run `make clean-apache` to remove the stale volume, then `make up-apache` again. To avoid this, pin a fixed `CLUSTER_ID` in `compose-apache-kafka.yml` under the `kafka` service's `environment` block.
+
+#### Differences between the two compose files
+
+| Aspect | `docker-compose.yml` (ZooKeeper) | `compose-apache-kafka.yml` (KRaft) |
+|---|---|---|
+| **Kafka image** | `confluentinc/cp-kafka:7.5.3` | `apache/kafka:latest` |
+| **Coordination** | ZooKeeper (`confluentinc/cp-zookeeper:7.5.3`) | Self-managed via KRaft |
+| **Services count** | 4: `api`, `worker`, `kafka`, `zookeeper` | 3: `api`, `worker`, `kafka` |
+| **Required env vars** | `KAFKA_ZOOKEEPER_CONNECT`, broker id, listeners | `CLUSTER_ID`, `KAFKA_NODE_ID`, `KAFKA_PROCESS_ROLES`, `KAFKA_CONTROLLER_QUORUM_VOTERS`, listeners |
+| **Volumes** | `kafka-data`, `kafka-secrets`, plus ZooKeeper data/log/secrets volumes | `kafka-data` only |
+| **Use case** | Stable, production-like Confluent stack; legacy ZooKeeper deployments | Simpler, modern Apache Kafka stack; no external dependency on ZooKeeper |
+
+#### KRaft vs. ZooKeeper mode
+
+**ZooKeeper mode** (current `docker-compose.yml`)
+
+Kafka traditionally relies on Apache ZooKeeper to store cluster metadata: broker membership, topic configuration, ACLs, and controller election. The Kafka broker connects to ZooKeeper at startup.
+
+- **Pros:** battle-tested for many Kafka versions; required for older Kafka clusters.
+- **Cons:** extra operational component to deploy, monitor, and secure; ZooKeeper can become a bottleneck and a source of complexity.
+
+**KRaft mode** (new `compose-apache-kafka.yml`)
+
+KRaft = Kafka Raft Metadata mode. Introduced in Kafka 2.8 and production-ready later, it removes ZooKeeper entirely. Kafka brokers themselves manage metadata using the Raft consensus protocol.
+
+Key concepts in the new compose file:
+
+- `CLUSTER_ID`: a fixed UUID that identifies the Kafka cluster. Must match the value stored in `meta.properties` in `kafka-data`.
+- `KAFKA_NODE_ID: 1`: unique id for this broker/controller node.
+- `KAFKA_PROCESS_ROLES: broker,controller`: this single node acts as both broker and controller.
+- `KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093`: the Raft voters (here, just this one node on port `29093`).
+- `KAFKA_LISTENERS`: two listeners — `PLAINTEXT://:29092` for clients and `CONTROLLER://:29093` for internal controller communication.
+- `KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER`: tells Kafka which listener to use for the Raft quorum.
+
+- **Pros:** simpler architecture, faster controller failover, easier deployment, no ZooKeeper dependency.
+- **Cons:** requires newer Kafka versions; some legacy tooling still assumes ZooKeeper.
+
+#### Official documentation
+
+- Apache Kafka KRaft overview and configuration: https://kafka.apache.org/documentation/#kraft
+- Apache Kafka Docker image quickstart: https://kafka.apache.org/documentation/#docker
+- Confluent Platform Kafka with ZooKeeper: https://docs.confluent.io/platform/current/installation/docker/config-reference.html
+- Kafka listeners explained: https://kafka.apache.org/documentation/#configuration_listeners
+
+#### Manual `docker compose` commands
+
+If you prefer to bypass `make`:
+
+```shell
+# ZooKeeper variant
+docker compose -f docker-compose.yml build
+docker compose -f docker-compose.yml up --remove-orphans
+docker compose -f docker-compose.yml down -v --remove-orphans
+
+# KRaft variant
+docker compose -f compose-apache-kafka.yml build
+docker compose -f compose-apache-kafka.yml up --remove-orphans
+docker compose -f compose-apache-kafka.yml down -v --remove-orphans
+```
+
 ---
 
 ## Usage Example
@@ -131,4 +202,5 @@ processed: Hello Faust!
   ```shell
   uv run pre-commit install
   ```
+
 
