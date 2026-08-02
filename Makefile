@@ -14,3 +14,16 @@ up:	## Run project with compose
 clean: ## Clean Reset project containers and volumes with compose
 	docker compose down -v --remove-orphans | true
 	docker compose rm -f | true
+
+.PHONY: build-apache
+build-apache: ## Build project with Apache Kafka KRaft compose
+	docker compose -f compose-apache-kafka.yml build
+
+.PHONY: up-apache
+up-apache: ## Run project with Apache Kafka KRaft compose
+	docker compose -f compose-apache-kafka.yml up --remove-orphans
+
+.PHONY: clean-apache
+clean-apache: ## Clean Reset project containers and volumes with Apache Kafka KRaft compose
+	docker compose -f compose-apache-kafka.yml down -v --remove-orphans | true
+	docker compose -f compose-apache-kafka.yml rm -f | true
