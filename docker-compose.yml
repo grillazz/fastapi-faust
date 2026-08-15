@@ -38,7 +38,7 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.5.3
     ports:
-      - "29092"
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181

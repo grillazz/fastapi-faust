@@ -2,9 +2,9 @@ services:
   api:
     build: .
     ports:
-      - "8080:8080"
+      - "8181:8181"
     command: bash -c "uvicorn app.app:app
-      --host 0.0.0.0 --port 8080
+      --host 0.0.0.0 --port 8181
       --lifespan=on --use-colors --loop uvloop --http httptools
       --reload --log-level debug
       "
@@ -38,7 +38,7 @@ services:
   kafka:
     image: apache/kafka:latest
     ports:
-      - "29092"
+      - "29092:29092"
     environment:
       CLUSTER_ID: "5L6g3nShT-eMCtK--X86sw"
       KAFKA_NODE_ID: 1
@@ -60,6 +60,16 @@ services:
       retries: 10
       start_period: 10s
 
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      AUTH_TYPE: DISABLED
+
+
 volumes:
   kafka-data: { }
-

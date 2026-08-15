@@ -9,10 +9,12 @@ stream_app = faust.App(
 
 events = stream_app.topic("events", value_type=str)
 
+
 @stream_app.agent(events)
-async def process(stream):
+async def process(stream: faust.Stream[str]) -> None:
     async for event in stream:
-        print(f"processed: {event}")
+        print(f"processed: {event=}")
+
 
 if __name__ == "__main__":
     stream_app.main()
